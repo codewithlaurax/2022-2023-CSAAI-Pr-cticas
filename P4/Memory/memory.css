@@ -63,6 +63,8 @@ button {
 
 .tablero {
     padding: 20px;
+    /* Borde gris alrededor del tablero (no una banda a lo ancho de la página) */
+    border: 3px solid #9e9e9e;
     display: grid;
     grid-template-columns: repeat(4, auto);
     grid-gap: 20px;
