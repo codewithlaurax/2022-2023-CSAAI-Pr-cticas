@@ -84,6 +84,30 @@ function dibujarO(xo,yo) {
 dibujarO(xo, yo);
 
 
+//-- OBJETIVO: lanzar el proyectil hasta impactar en la bola roja (posición aleatoria).
+//--
+//-- Lo que hacía falta para conseguirlo (implementado abajo):
+//--  1) Calcular la velocidad inicial (vx, vy) a partir del ángulo y la velocidad
+//--     de los sliders. El slider va de 0 a 100 y se escala a px/s.
+//--  2) Animar el proyectil con las ecuaciones del tiro parabólico:
+//--        x(t) = x0 + vx·t
+//--        y(t) = y0 - (vy·t - ½·g·t²)     (en el canvas, y crece hacia abajo)
+//--  3) En cada fotograma (requestAnimationFrame) repintar el objetivo y el proyectil.
+//--  4) Detectar el impacto comparando el rectángulo del proyectil con el círculo rojo.
+//--  5) Terminar el tiro (impacto, salida por la derecha o caída al suelo) y parar el cronómetro.
+//--
+//-- Para impactar a una distancia d con ángulo de 45°, la velocidad necesaria es
+//-- v0 = √(g·d). Con g = 200 y d = 400 px, v0 ≈ 283 px/s, es decir, slider ≈ 71.
+//--
+//-- Errores de la versión anterior:
+//--  - lanzar() y tiroParabolico() estaban comentadas, así que el botón no hacía nada.
+//--  - La gravedad se usaba como `gt`, que no existe.
+//--  - angp = Number(angulo_disparo) convertía el elemento HTML, no su valor.
+//--  - `t` nunca avanzaba y `xop`/`yop` no estaban definidas.
+//--  - g = 9.8 (m/s²) no sirve en píxeles: con v0 = 200 px/s el alcance a 45° sería
+//--    v²/g ≈ 4080 px, unas 6 veces el canvas. Por eso se usa g = 200 px/s², una escala de juego
+//--    con la que el alcance a 45° con v0 = 200 px/s es de 200 px.
+
 //-- Constantes del tiro parabólico (unidades en píxeles y segundos)
 const g = 200; //-- Gravedad (px/s²)
 const factor_velocidad = 4; //-- Convierte el valor del slider (0-100) en px/s
