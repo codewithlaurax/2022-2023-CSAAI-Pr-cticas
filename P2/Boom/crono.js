@@ -26,7 +26,7 @@ class Crono {
 
         //-- 60 segundos hacen un minuto
         if (this.seg == 60) {
-        this.min = 1;
+        this.min += 1;
         this.seg = 0;
         }
 
