@@ -10,11 +10,10 @@ html {
     font-family: Montserrat;
 }
 
+/* CORRECCIÓN: antes era position absolute con top: 90%, así que el tablero quedaba muy abajo.
+   Ahora va en el flujo normal de la página y centrado. */
 .game {
-    position: absolute;
-    top: 90%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    margin: 30px auto;
     text-align: center;
 }
 
@@ -44,8 +43,11 @@ button {
     font-size: 14pt;
 }
 
+/* CORRECCIÓN: el tablero se centra horizontalmente dentro del contenedor */
 .grid-container {
     position: relative;
+    display: flex;
+    justify-content: center;
     background-color: #f6eeff;
     clear: both;
 }

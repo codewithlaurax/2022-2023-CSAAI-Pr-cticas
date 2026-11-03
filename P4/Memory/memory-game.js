@@ -25,7 +25,8 @@ reiniciar.onclick = () => {
 };
 
 let nivel = document.getElementById("nivel");
-let dimension;
+//-- Nivel con el que se generó el tablero actual (para deshacer cambios con la partida empezada)
+let nivelActual = nivel.value;
 
 const generateGame = () => {
     let valorSeleccionado = parseInt(nivel.value);
@@ -69,7 +70,11 @@ const generateGame = () => {
 
     //-- Por último, vamos a inyectar el código html que hemos generado dentro de el contenedor
     // para el tablero de juego.
-    selectors.tablero.replaceWith(parser.querySelector('.tablero'))
+    //-- CORRECCIÓN: guardamos el nuevo tablero en selectors. Antes se seguía usando el
+    // elemento viejo, ya reemplazado, así que al cambiar de nivel otra vez no pasaba nada.
+    const nuevoTablero = parser.querySelector('.tablero')
+    selectors.tablero.replaceWith(nuevoTablero)
+    selectors.tablero = nuevoTablero
 }
 
 const pickRandom = (array, items) => {
@@ -216,25 +221,20 @@ const flipBackCards = () => {
     state.flippedCards = 0
 }
 
+//-- CORRECCIÓN: el nivel solo se puede cambiar antes de empezar la partida, como indica el texto.
+// Antes había código muerto (la variable `dimension` nunca se asignaba).
 nivel.addEventListener("change", function() {
-    let valorSeleccionado = parseInt(nivel.value);
-    let dimensions;
-
-    if (dimension == 4) {
-
-        if (valorSeleccionado == 2) {
-            valorSeleccionado = dimensions;
-            console.log("El nivel seleccionado es el facil")
-        } else if (valorSeleccionado == 4) {
-            valorSeleccionado = dimensions;
-            console.log("El nivel seleccionado es el medio")
-        } else if (valorSeleccionado == 6) {
-            valorSeleccionado = dimensions;
-            console.log("El nivel seleccionado es el dificil")
-        }
+    if (state.gameStarted) {
+        nivel.value = nivelActual
+        return
     }
-    generateGame();
+    nivelActual = nivel.value
+    generateGame()
 });
+
+//-- CORRECCIÓN: el tablero se genera al cargar la página con el nivel por defecto (Fácil).
+// Antes solo se generaba al cambiar de nivel, así que al abrir la página no aparecía nada.
+generateGame()
 
 // Asignamos las funciones de callback para determinados eventos
 attachEventListeners()
