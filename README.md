@@ -9,9 +9,9 @@ Cada enlace abre la práctica directamente en GitHub Pages.
 
 | Práctica | Enlace |
 |---|---|
-| Práctica 1: CV | [Abrir](https://codewithlaurax.github.io/2022-2023-CSAAI-Pr-cticas/P1/CV/index.html) |
-| Práctica 2: Boom | [Abrir](https://codewithlaurax.github.io/2022-2023-CSAAI-Pr-cticas/P2/Boom/index.html) |
-| Práctica 3: Tiro parabólico | [Abrir](https://codewithlaurax.github.io/2022-2023-CSAAI-Pr-cticas/P3/TP/index.html) |
-| Práctica 4: Memory | [Abrir](https://codewithlaurax.github.io/2022-2023-CSAAI-Pr-cticas/P4/Memory/index.html) |
-| Práctica 5: Simulando la red | [Abrir](https://codewithlaurax.github.io/2022-2023-CSAAI-Pr-cticas/P5/Net/index.html) |
-| Práctica 5: TV | [Abrir](https://codewithlaurax.github.io/2022-2023-CSAAI-Pr-cticas/P5/TV/Ej-01.html) |
+| Práctica 1: CV | [Abrir](https://codewithlaurax.github.io/CSAAI-Practicas/P1/CV/index.html) |
+| Práctica 2: Boom | [Abrir](https://codewithlaurax.github.io/CSAAI-Practicas/P2/Boom/index.html) |
+| Práctica 3: Tiro parabólico | [Abrir](https://codewithlaurax.github.io/CSAAI-Practicas/P3/TP/index.html) |
+| Práctica 4: Memory | [Abrir](https://codewithlaurax.github.io/CSAAI-Practicas/P4/Memory/index.html) |
+| Práctica 5: Simulando la red | [Abrir](https://codewithlaurax.github.io/CSAAI-Practicas/P5/Net/index.html) |
+| Práctica 5: TV | [Abrir](https://codewithlaurax.github.io/CSAAI-Practicas/P5/TV/Ej-01.html) |
