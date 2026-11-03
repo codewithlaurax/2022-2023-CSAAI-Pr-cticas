@@ -84,40 +84,129 @@ function dibujarO(xo,yo) {
 dibujarO(xo, yo);
 
 
-// //-- Velocidad del proyectil
-// let velp = 1;
+//-- OBJETIVO: lanzar el proyectil hasta impactar en la bola roja (posición aleatoria).
+//--
+//-- Lo que hacía falta para conseguirlo (implementado abajo):
+//--  1) Calcular la velocidad inicial (vx, vy) a partir del ángulo y la velocidad
+//--     de los sliders. El slider va de 0 a 100 y se escala a px/s.
+//--  2) Animar el proyectil con las ecuaciones del tiro parabólico:
+//--        x(t) = x0 + vx·t
+//--        y(t) = y0 - (vy·t - ½·g·t²)     (en el canvas, y crece hacia abajo)
+//--  3) En cada fotograma (requestAnimationFrame) repintar el objetivo y el proyectil.
+//--  4) Detectar el impacto comparando el rectángulo del proyectil con el círculo rojo.
+//--  5) Terminar el tiro: impacto o caída al suelo (se para el cronómetro) o salida del canvas
+//--     por la derecha o por arriba (el tiro se reinicia y se puede volver a lanzar).
+//--
+//-- Para impactar a una distancia d con ángulo de 45°, la velocidad necesaria es
+//-- v0 = √(g·d). Con g = 200 y d = 400 px, v0 ≈ 283 px/s, es decir, slider ≈ 71.
+//--
+//-- Errores de la versión anterior:
+//--  - lanzar() y tiroParabolico() estaban comentadas, así que el botón no hacía nada.
+//--  - La gravedad se usaba como `gt`, que no existe.
+//--  - angp = Number(angulo_disparo) convertía el elemento HTML, no su valor.
+//--  - `t` nunca avanzaba y `xop`/`yop` no estaban definidas.
+//--  - g = 9.8 (m/s²) no sirve en píxeles: con v0 = 200 px/s el alcance a 45° sería
+//--    v²/g ≈ 4080 px, unas 6 veces el canvas. Por eso se usa g = 200 px/s², una escala de juego
+//--    con la que el alcance a 45° con v0 = 200 px/s es de 200 px.
 
-// //-- Función principal de actualización
-// function lanzar() 
-// {
-// //-- Implementación del algoritmo de animación:
+//-- Constantes del tiro parabólico (unidades en píxeles y segundos)
+const g = 200; //-- Gravedad (px/s²)
+const factor_velocidad = 4; //-- Convierte el valor del slider (0-100) en px/s
+const y_suelo = 260; //-- Posición vertical del proyectil en el suelo
+const radio_objetivo = 25;
 
-// //-- 1) Actualizar posición de los elementos
-// xp = xp + velp;
+let volando = false; //-- Indica si hay un tiro en curso
+let t_inicio = 0; //-- Instante del lanzamiento (ms)
+let x0 = 0; //-- Posición de partida del proyectil
+let y0 = y_suelo;
+let vx = 0; //-- Componentes de la velocidad inicial
+let vy = 0;
 
-// //-- 2) Borrar el canvas
-// ctx.clearRect(0, 0, canvas.width, canvas.height);
+//-- Elemento donde mostrar el resultado del tiro
+const resultado = document.getElementById("resultado");
 
-// //-- 3) Pintar los elementos en el canvas
-// dibujarO(xo,yo); // Pintar el objetivo
-// dibujarP(xop, yop, 40, 40, "blue"); // Pintar el proyectil
+//-- Calcula la velocidad inicial a partir del ángulo y la velocidad elegidos
+function calcularVelocidad() {
+  const v0 = Number(velocidad) * factor_velocidad;
+  const rad = Number(angulo) * Math.PI / 180;
+  vx = v0 * Math.cos(rad);
+  vy = v0 * Math.sin(rad);
+}
 
-// //-- 4) Repetir
-// requestAnimationFrame(lanzar);
-// }
+//-- Comienza el tiro: guarda la posición de partida y arranca la animación
+function lanzar() {
+  if (volando) return;
 
-// //-- Datos para el tiro parabolico
-// const g = 9.8; //-- Gravedad
-// let t = 0; //-- Tiempo
+  volando = true;
+  resultado.textContent = "";
+  calcularVelocidad();
 
-// function tiroParabolico() {
-//   angp = Number(angulo_disparo);
-//   velp = Number(velocidad_disparo);
+  x0 = xp;
+  y0 = y_suelo;
+  t_inicio = performance.now();
+  requestAnimationFrame(actualizar);
+}
 
-//   xp = xop + velp * Math.cos(angp * Math.PI / 180) * t;
-//   yp = yop + velp * Math.sin(angp * Math.PI / 180) * t - 0.5 * gt * t * t;
-//   t = +0.1; //-- Cuanto avanza el proyectil en el tiro
-// }
+//-- Función de animación: se ejecuta en cada fotograma mientras dura el tiro
+function actualizar(ahora) {
+  //-- Tiempo transcurrido desde el lanzamiento (s)
+  const t = (ahora - t_inicio) / 1000;
+
+  //-- Nueva posición del proyectil (el eje y crece hacia abajo en el canvas)
+  xp = x0 + vx * t;
+  yp = y0 - (vy * t - 0.5 * g * t * t);
+
+  //-- Repintar el canvas con el objetivo y el proyectil
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dibujarO(xo, yo);
+  dibujarP(xp, yp, lx, ly, "yellow");
+
+  if (impacta()) {
+    terminar("¡Impacto!");
+  } else if (fueraDelCanvas()) {
+    reiniciar("El proyectil ha salido del canvas. Vuelve a intentarlo.");
+  } else if (yp > y_suelo && t > 0) {
+    terminar("Fallo");
+  } else {
+    requestAnimationFrame(actualizar);
+  }
+}
+
+//-- Comprueba si el proyectil toca el objetivo
+function impacta() {
+  //-- Punto del rectángulo del proyectil más cercano al centro del objetivo
+  const cx = Math.max(xp, Math.min(xo, xp + lx));
+  const cy = Math.max(yp, Math.min(yo, yp + ly));
+  const dx = xo - cx;
+  const dy = yo - cy;
+  return dx * dx + dy * dy <= radio_objetivo * radio_objetivo;
+}
+
+//-- Comprueba si el proyectil ha salido del canvas por la derecha o por arriba
+function fueraDelCanvas() {
+  return xp > canvas.width || yp + ly < 0;
+}
+
+//-- Termina el tiro: para el cronómetro y muestra el resultado
+function terminar(mensaje) {
+  volando = false;
+  crono.stop();
+  resultado.textContent = mensaje;
+}
+
+//-- Reinicia el tiro: el proyectil vuelve a la posición de partida y el cronómetro a cero
+function reiniciar(mensaje) {
+  volando = false;
+  crono.stop();
+  crono.reset();
+  xp = 0;
+  yp = y_suelo;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dibujarO(xo, yo);
+  dibujarP(xp, yp, lx, ly, "yellow");
+  resultado.textContent = mensaje;
+}
 
 
 //-- Genera nuevas coordenadas para el objeto
