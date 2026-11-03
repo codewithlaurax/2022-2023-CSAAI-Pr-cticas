@@ -59,7 +59,7 @@ const generateGame = () => {
     const cards = `
         <div class="tablero" style="grid-template-columns: repeat(${dimensions}, auto)">
             ${items.map(item => `
-                <div class="card">
+                <div class="card" tabindex="0">
                     <div class="card-front"></div>
                     <div class="card-back">${item}</div>
                 </div>
@@ -119,24 +119,34 @@ const shuffle = array => {
     return clonedArray
 }
 
+//-- Gira una carta si no está girada y si no hay ya dos cartas giradas esperando a volverse
+const intentarGirar = card => {
+    if (!card || card.classList.contains('flipped') || state.flippedCards >= 2) {
+        return
+    }
+    flipCard(card)
+}
+
 const attachEventListeners = () => {
     document.addEventListener('click', event => {
-        // Del evento disparado vamos a obtener alguna información útil
-        // Como el elemento que ha disparado el evento y el contenedor que lo contiene
-        const eventTarget = event.target
-        const eventParent = eventTarget.parentElement
+        // CORRECCIÓN: closest() encuentra la carta aunque se pulse su borde, no solo sus caras
+        const card = event.target.closest('.card')
 
         // Cuando se trata de una carta que no está girada, le damos la vuelta para mostrarla
-        if (eventTarget.className.includes('card') && !eventParent.className.includes('flipped')) {
-            //-- CORRECCIÓN: con dos cartas ya giradas no se admiten más clics hasta que se vuelvan.
-            // Antes una tercera carta contaba como movimiento sin girarse.
-            if (state.flippedCards < 2) {
-                flipCard(eventParent)
-            }
+        if (card) {
+            intentarGirar(card)
         // Pero si lo que ha pasado es un clic en el botón de comenzar lo que hacemos es
         // empezar el juego
-        } else if (eventTarget.nodeName === 'BUTTON' && !eventTarget.className.includes('disabled')) {
+        } else if (event.target.nodeName === 'BUTTON' && !event.target.classList.contains('disabled')) {
             startGame()
+        }
+    })
+
+    // CORRECCIÓN: las cartas tienen tabindex, así que también se giran con Enter o Espacio
+    document.addEventListener('keydown', event => {
+        if ((event.key === 'Enter' || event.key === ' ') && event.target.classList.contains('card')) {
+            event.preventDefault()
+            intentarGirar(event.target)
         }
     })
 }
@@ -144,6 +154,8 @@ const attachEventListeners = () => {
 const startGame = () => {
     // Iniciamos el estado de juego
     state.gameStarted = true
+    // CORRECCIÓN: con la partida empezada el nivel ya no se puede cambiar
+    nivel.disabled = true
     // Desactivamos el botón de comenzar
     selectors.comenzar.classList.add('disabled')
 
