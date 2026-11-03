@@ -5,7 +5,9 @@ const selectors = {
     tablero: document.querySelector('.tablero'),
     movimientos: document.querySelector('.movimientos'),
     timer: document.querySelector('.timer'),
-    comenzar: document.querySelector('button'),
+    parejas: document.querySelector('.parejas'),
+    //-- CORRECCIÓN: antes era document.querySelector('button'), que depende del orden de la página
+    comenzar: document.getElementById('start'),
     win: document.querySelector('.win')
 }
 
@@ -14,6 +16,7 @@ const state = {
     flippedCards: 0,
     totalFlips: 0,
     totalTime: 0,
+    matchedPairs: 0,
     loop: null
 }
 
@@ -125,7 +128,11 @@ const attachEventListeners = () => {
 
         // Cuando se trata de una carta que no está girada, le damos la vuelta para mostrarla
         if (eventTarget.className.includes('card') && !eventParent.className.includes('flipped')) {
-            flipCard(eventParent)
+            //-- CORRECCIÓN: con dos cartas ya giradas no se admiten más clics hasta que se vuelvan.
+            // Antes una tercera carta contaba como movimiento sin girarse.
+            if (state.flippedCards < 2) {
+                flipCard(eventParent)
+            }
         // Pero si lo que ha pasado es un clic en el botón de comenzar lo que hacemos es
         // empezar el juego
         } else if (eventTarget.nodeName === 'BUTTON' && !eventTarget.className.includes('disabled')) {
@@ -145,10 +152,15 @@ const startGame = () => {
     // y movimientos
     state.loop = setInterval(() => {
         state.totalTime++
-
-        selectors.movimientos.innerText = `Movimientos: ${state.totalFlips}`
-        selectors.timer.innerText = `Tiempo: ${state.totalTime} sec`
+        actualizarMarcador()
     }, 1000)
+}
+
+//-- CORRECCIÓN: el marcador se actualiza también al girar una carta, no solo cada segundo
+const actualizarMarcador = () => {
+    selectors.movimientos.innerText = `Movimientos: ${state.totalFlips}`
+    selectors.timer.innerText = `Tiempo: ${state.totalTime} sec`
+    selectors.parejas.innerText = `Parejas: ${state.matchedPairs} de ${document.querySelectorAll('.card').length / 2}`
 }
 
 const flipCard = card => {
@@ -156,6 +168,7 @@ const flipCard = card => {
     state.flippedCards++
     // Sumamos uno al contador general de movimientos
     state.totalFlips++
+    actualizarMarcador()
 
     // Si el juego no estaba iniciado, lo iniciamos
     if (!state.gameStarted) {
@@ -179,6 +192,8 @@ const flipCard = card => {
         if (flippedCards[0].innerText === flippedCards[1].innerText) {
             flippedCards[0].classList.add('matched')
             flippedCards[1].classList.add('matched')
+            state.matchedPairs++
+            actualizarMarcador()
         }
 
         // Arrancamos un temporizador que comprobará si tiene
@@ -235,6 +250,7 @@ nivel.addEventListener("change", function() {
 //-- CORRECCIÓN: el tablero se genera al cargar la página con el nivel por defecto (Fácil).
 // Antes solo se generaba al cambiar de nivel, así que al abrir la página no aparecía nada.
 generateGame()
+actualizarMarcador()
 
 // Asignamos las funciones de callback para determinados eventos
 attachEventListeners()
