@@ -166,8 +166,11 @@ const actualizarMarcador = () => {
 const flipCard = card => {
     // Sumamos uno al contador de cartas giradas
     state.flippedCards++
-    // Sumamos uno al contador general de movimientos
-    state.totalFlips++
+    // CORRECCIÓN: un movimiento es un intento de pareja (dos cartas giradas), no una carta.
+    // Antes cada carta sumaba un movimiento, así que una pareja acertada a la primera sumaba 2.
+    if (state.flippedCards === 2) {
+        state.totalFlips++
+    }
     actualizarMarcador()
 
     // Si el juego no estaba iniciado, lo iniciamos
