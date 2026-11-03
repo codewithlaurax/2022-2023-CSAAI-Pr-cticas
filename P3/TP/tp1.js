@@ -94,7 +94,8 @@ dibujarO(xo, yo);
 //--        y(t) = y0 - (vy·t - ½·g·t²)     (en el canvas, y crece hacia abajo)
 //--  3) En cada fotograma (requestAnimationFrame) repintar el objetivo y el proyectil.
 //--  4) Detectar el impacto comparando el rectángulo del proyectil con el círculo rojo.
-//--  5) Terminar el tiro (impacto, salida por la derecha o caída al suelo) y parar el cronómetro.
+//--  5) Terminar el tiro: impacto o caída al suelo (se para el cronómetro) o salida del canvas
+//--     por la derecha o por arriba (el tiro se reinicia y se puede volver a lanzar).
 //--
 //-- Para impactar a una distancia d con ángulo de 45°, la velocidad necesaria es
 //-- v0 = √(g·d). Con g = 200 y d = 400 px, v0 ≈ 283 px/s, es decir, slider ≈ 71.
@@ -162,7 +163,9 @@ function actualizar(ahora) {
 
   if (impacta()) {
     terminar("¡Impacto!");
-  } else if ((yp > y_suelo && t > 0) || xp > canvas.width) {
+  } else if (fueraDelCanvas()) {
+    reiniciar("El proyectil ha salido del canvas. Vuelve a intentarlo.");
+  } else if (yp > y_suelo && t > 0) {
     terminar("Fallo");
   } else {
     requestAnimationFrame(actualizar);
@@ -179,10 +182,29 @@ function impacta() {
   return dx * dx + dy * dy <= radio_objetivo * radio_objetivo;
 }
 
+//-- Comprueba si el proyectil ha salido del canvas por la derecha o por arriba
+function fueraDelCanvas() {
+  return xp > canvas.width || yp + ly < 0;
+}
+
 //-- Termina el tiro: para el cronómetro y muestra el resultado
 function terminar(mensaje) {
   volando = false;
   crono.stop();
+  resultado.textContent = mensaje;
+}
+
+//-- Reinicia el tiro: el proyectil vuelve a la posición de partida y el cronómetro a cero
+function reiniciar(mensaje) {
+  volando = false;
+  crono.stop();
+  crono.reset();
+  xp = 0;
+  yp = y_suelo;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dibujarO(xo, yo);
+  dibujarP(xp, yp, lx, ly, "yellow");
   resultado.textContent = mensaje;
 }
 
