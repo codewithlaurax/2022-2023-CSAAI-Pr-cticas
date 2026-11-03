@@ -48,7 +48,7 @@ button {
     position: relative;
     display: flex;
     justify-content: center;
-    background-color: #f6eeff;
+    /* CORRECCIÓN: sin fondo propio, así se ve el amarillo de la página detrás del tablero */
     clear: both;
 }
 
