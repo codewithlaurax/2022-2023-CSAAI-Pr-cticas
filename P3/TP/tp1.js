@@ -142,7 +142,9 @@ function lanzar() {
   resultado.textContent = "";
   calcularVelocidad();
 
-  x0 = xp;
+  //-- CORRECCIÓN: cada tiro sale del cañón (x = 0, esquina inferior izquierda).
+  //-- Antes era `x0 = xp`, así que el siguiente tiro empezaba donde había caído el anterior.
+  x0 = 0;
   y0 = y_suelo;
   t_inicio = performance.now();
   t_anterior = 0;
