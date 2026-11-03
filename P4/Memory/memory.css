@@ -63,6 +63,8 @@ button {
 
 .tablero {
     padding: 20px;
+    /* Color de fondo del tablero de antes (solo dentro del tablero, no a lo ancho de la página) */
+    background-color: #f6eeff;
     display: grid;
     grid-template-columns: repeat(4, auto);
     grid-gap: 20px;
