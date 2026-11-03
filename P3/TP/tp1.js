@@ -117,6 +117,7 @@ const radio_objetivo = 25;
 
 let volando = false; //-- Indica si hay un tiro en curso
 let t_inicio = 0; //-- Instante del lanzamiento (ms)
+let t_anterior = 0; //-- Último instante comprobado en la animación (s)
 let x0 = 0; //-- Posición de partida del proyectil
 let y0 = y_suelo;
 let vx = 0; //-- Componentes de la velocidad inicial
@@ -144,7 +145,16 @@ function lanzar() {
   x0 = xp;
   y0 = y_suelo;
   t_inicio = performance.now();
+  t_anterior = 0;
   requestAnimationFrame(actualizar);
+}
+
+//-- Posición del proyectil en el instante t (s) desde el lanzamiento
+function posicionEn(t) {
+  return {
+    x: x0 + vx * t,
+    y: y0 - (vy * t - 0.5 * g * t * t) //-- el eje y crece hacia abajo en el canvas
+  };
 }
 
 //-- Función de animación: se ejecuta en cada fotograma mientras dura el tiro
@@ -152,34 +162,47 @@ function actualizar(ahora) {
   //-- Tiempo transcurrido desde el lanzamiento (s)
   const t = (ahora - t_inicio) / 1000;
 
-  //-- Nueva posición del proyectil (el eje y crece hacia abajo en el canvas)
-  xp = x0 + vx * t;
-  yp = y0 - (vy * t - 0.5 * g * t * t);
+  //-- Nueva posición del proyectil
+  const p = posicionEn(t);
+  xp = p.x;
+  yp = p.y;
 
   //-- Repintar el canvas con el objetivo y el proyectil
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   dibujarO(xo, yo);
   dibujarP(xp, yp, lx, ly, "yellow");
 
-  if (impacta()) {
+  if (impactaEntre(t_anterior, t)) {
     terminar("¡Impacto!");
   } else if (fueraDelCanvas()) {
     reiniciar("El proyectil ha salido del canvas. Vuelve a intentarlo.");
   } else if (yp > y_suelo && t > 0) {
     terminar("Fallo");
   } else {
+    t_anterior = t;
     requestAnimationFrame(actualizar);
   }
 }
 
-//-- Comprueba si el proyectil toca el objetivo
-function impacta() {
+//-- Comprueba si el proyectil toca el objetivo en la posición (x, y)
+function impacta(x, y) {
   //-- Punto del rectángulo del proyectil más cercano al centro del objetivo
-  const cx = Math.max(xp, Math.min(xo, xp + lx));
-  const cy = Math.max(yp, Math.min(yo, yp + ly));
+  const cx = Math.max(x, Math.min(xo, x + lx));
+  const cy = Math.max(y, Math.min(yo, y + ly));
   const dx = xo - cx;
   const dy = yo - cy;
   return dx * dx + dy * dy <= radio_objetivo * radio_objetivo;
+}
+
+//-- Comprueba si hubo impacto entre dos instantes, revisando la trayectoria intermedia.
+//-- Así no se salta el objetivo si el navegador tarda en pintar un fotograma.
+function impactaEntre(t0, t1) {
+  const pasos = 20;
+  for (let i = 1; i <= pasos; i++) {
+    const p = posicionEn(t0 + (t1 - t0) * i / pasos);
+    if (impacta(p.x, p.y)) return true;
+  }
+  return false;
 }
 
 //-- Comprueba si el proyectil ha salido del canvas por la derecha o por arriba
