@@ -170,7 +170,8 @@ p {
     text-align: center;
 }
 
-.timer {
+.timer,
+.parejas {
     display: flex;
     justify-content: center;
     align-items: center;
