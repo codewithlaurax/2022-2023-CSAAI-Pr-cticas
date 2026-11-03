@@ -181,3 +181,22 @@ p {
 div {
     display: block;
 }
+
+/* CORRECCIÓN: en pantallas estrechas las cartas se reducen para que el nivel Difícil (6×6)
+   no se salga de la pantalla. Antes eran de 100 px fijos. */
+@media (max-width: 720px) {
+    .card {
+        width: 70px;
+        height: 70px;
+    }
+
+    .card-back {
+        font-size: 20pt;
+        line-height: 70px;
+    }
+
+    .tablero {
+        padding: 10px;
+        grid-gap: 10px;
+    }
+}
